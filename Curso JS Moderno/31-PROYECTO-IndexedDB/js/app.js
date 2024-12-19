@@ -1,4 +1,4 @@
-
+let DB;
 const mascotaInput = document.querySelector('#mascota');
 const propietarioInput = document.querySelector('#propietario');
 const telefonoInput = document.querySelector('#telefono');
@@ -18,6 +18,12 @@ const heading = document.querySelector('#administra');
 
 
 let editando = false;
+
+
+window.onload = () =>{
+    eventListeners();
+    crearDB();
+}
 
 
 // Eventos
@@ -204,8 +210,20 @@ function nuevaCita(e) {
         // Añade la nueva cita
         administrarCitas.agregarCita({...citaObj});
 
-        // Mostrar mensaje de que todo esta bien...
-        ui.imprimirAlerta('Se agregó correctamente')
+
+        //Insertar registro en indexedDB
+        const transaction = DB.transaction(['citas'], 'readwrite')
+        //Habilitar el objectstore
+        const objectStore = transaction.objectStore('citas')
+        //Insertar en la BD
+        objectStore.add(citaObj)
+
+        transaction.oncomplete = function(){
+            console.log('Cita agregada')
+            // Mostrar mensaje de que todo esta bien...
+            ui.imprimirAlerta('Se agregó correctamente')
+        }
+
     }
 
 
@@ -262,4 +280,43 @@ function cargarEdicion(cita) {
 
     editando = true;
 
+}
+
+function crearDB(){
+    //crear la base de datos en version 1.0
+    const crearDB = window.indexedDB.open('citas',1);
+
+    //SI HAY UN ERROR
+    crearDB.onerror = function(){
+        console.log('error')
+    }
+
+    //SI TODO SALIO BIEN
+    crearDB.onsuccess = function(){
+        console.log('bien')
+
+        DB = crearDB.result
+
+    }
+
+    //Definir el esquema
+    crearDB.onupgradeneeded = function(e){
+        const db = e.target.result;
+
+        const objectStore = db.createObjectStore('citas',{
+            keyPath: 'id',
+            autoIncrement: true
+        })
+
+        //Definir todas las columnas
+        objectStore.createIndex('mascota', 'mascota', {unique:false})
+        objectStore.createIndex('propietario', 'propietario', {unique:false})
+        objectStore.createIndex('telefono', 'telefono', {unique:false})
+        objectStore.createIndex('fecha', 'fecha', {unique:false})
+        objectStore.createIndex('hora', 'hora', {unique:false})
+        objectStore.createIndex('sintomas', 'sintomas', {unique:false})
+        objectStore.createIndex('id', 'i', {unique:true})
+
+        console.log('DB creada y lista')
+    }
 }
