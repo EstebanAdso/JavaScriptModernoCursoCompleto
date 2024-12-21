@@ -1,25 +1,14 @@
 (function(){
     let DB;
-    const formulario = document.querySelector('#formulario')
+    const formulario = document.getElementById('formulario');
 
     document.addEventListener('DOMContentLoaded', ()=>{
-        console.log('hola')
+        formulario.addEventListener('submit', validarCliente)
         conectarDB();
-        formulario.addEventListener('submit', validarCliente);
+
     })
 
-    function conectarDB(){
-        const abrirConexion = window.indexedDB.open('crm', 1);
 
-        abrirConexion.onerror = function(){
-            console.log('hubo un error')
-        }
-
-        abrirConexion.onsuccess = function(){
-            DB = abrirConexion.result; //Instancia de la conexion de la base de datos.
-            console.log('exitoso')
-        }
-    }
 
     function validarCliente(e){
         e.preventDefault();
@@ -44,30 +33,27 @@
             empresa,
             id: Date.now()
         }
+
+        crearNuevoCliente(cliente)
     }
 
-    function imprimirAlerta(mensaje, tipo){
+    function crearNuevoCliente(cliente){
+        const transaction = DB.transaction(['crm'], 'readwrite');
+        const objectStore = transaction.objectStore('crm');
 
-        const alerta = document.querySelector('.alerta');
+        objectStore.add(cliente);
 
-        if(!alerta){
-            //crear la alerta
-            const divMensaje = document.createElement('div');
-            divMensaje.classList.add('px4', 'py3', 'rounded', 'max-w-lg', 'mx-auto', 'mt-6', 'text-center', 'border', 'alerta');
-            
-            if(tipo === 'error'){
-                divMensaje.classList.add('bg-red-100', 'border-red-400', 'text-red-700');
-            }else{
-                divMensaje.classList.add('bg-green-100', 'border-green-400', 'text-green-700');
-            }
-            
-            divMensaje.textContent = mensaje;
-            
-            formulario.appendChild(divMensaje);
-            
-            setTimeout(()=>{
-                divMensaje.remove();
-            },3000)
+        transaction.onerror = function(){
+            imprimirAlerta('Hubo un error', 'error')
+        }
+
+        transaction.oncomplete = function(){
+            imprimirAlerta('El cliente se agrego correctamente')
         }
     }
+
+  
 })
+
+
+
