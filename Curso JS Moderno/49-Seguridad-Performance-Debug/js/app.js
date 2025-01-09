@@ -37,6 +37,9 @@ function consultarCriptomonedas() {
 // llena el select 
 function selectCriptomonedas(criptomonedas) {
 
+    //Conocer el tiempo de ejecución
+    const inicio = performance.now();
+
     criptomonedas.forEach( cripto => {
         const { FullName, Name } = cripto.CoinInfo;
         const option = document.createElement('option');
@@ -45,6 +48,9 @@ function selectCriptomonedas(criptomonedas) {
         // insertar el HTML
         criptomonedasSelect.appendChild(option);
     });
+
+    const fin = performance.now();
+    console.log(fin - inicio)
 
 }
 
@@ -89,6 +95,8 @@ function mostrarAlerta(mensaje) {
 
 function consultarAPI() {
 
+    const inicio = performance.now
+
     const { moneda, criptomoneda} = objBusqueda;
 
     const url = `https://min-api.cryptocompare.com/data/pricemultifull?fsyms=${criptomoneda}&tsyms=${moneda}`;
@@ -101,6 +109,10 @@ function consultarAPI() {
             mostrarCotizacionHTML(cotizacion.DISPLAY[criptomoneda][moneda]);
         });
 
+    const fin = performance.now
+
+    console.log(fin - inicio)
+
 }
 
 function mostrarCotizacionHTML(cotizacion) {
@@ -111,7 +123,7 @@ function mostrarCotizacionHTML(cotizacion) {
     const  { PRICE, HIGHDAY, LOWDAY, CHANGEPCT24HOUR, LASTUPDATE } = cotizacion;
 
 
-    debugger;
+    debugger; //detiene la ejecucion y muestra todas las variables que tenemos disponibles
 
     const precio = document.createElement('p');
     precio.classList.add('precio');
